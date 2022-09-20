@@ -1,0 +1,74 @@
+Public T(30, 30) As Double
+Dim Dx, Dy, eps, w, hatamax As Double
+Dim CC, CW, CE, CS, CN As Double
+Sub YAS_heterojen(T)
+
+eps = Sayfa2.[T9]
+w = Sayfa2.[T8]
+
+Dx = 500
+Dy = 500
+
+For iter = 1 To 10000
+
+    For i = 5 To 16
+ 
+        H(i, 4) = H(i, 6) - (0.5 * Dx) / (T(i, 4))
+        Ha(i, 4) = Ha(i, 6) - (0.5 * Dx) / (T(i, 4))
+    
+        For j = 4 To 17
+            
+            
+            If IBOUND(i, j) = 1 Then
+                CW = 2 * T(i, j) * T(i, j - 1) / ((Dx * T(i, j) + Dx * T(i, j - 1)) * Dx)
+                CE = 2 * T(i, j) * T(i, j + 1) / ((Dx * T(i, j) + Dx * T(i, j + 1)) * Dx)
+                CN = 2 * T(i, j) * T(i - 1, j) / ((Dy * T(i, j) + Dy * T(i - 1, j)) * Dy)
+                CS = 2 * T(i, j) * T(i + 1, j) / ((Dy * T(i, j) + Dy * T(i + 1, j)) * Dy)
+                
+                Ha(i, j) = (1 - w) * H(i, j) + w * (CE * H(i, j + 1) + CW * Ha(i, j - 1) + CN * Ha(i - 1, j) + CS * H(i + 1, j) + Q(i, j) / (Dx * Dy)) / (CE + CW + CN + CS)
+                
+                hata(i, j) = Abs(Ha(i, j) - H(i, j))
+                H(i, j) = Ha(i, j)
+                
+             End If
+        Next j
+    Next i
+
+hatamax = hata(5, 5)
+
+    For i = 4 To 17
+        For j = 4 To 17
+             If IBOUND(i, j) = 1 Then
+                If hatamax <= hata(i, j) Then
+                    hatamax = hata(i, j)
+                End If
+             End If
+         Next j
+    Next i
+    
+    If hatamax <= eps Then
+         GoTo exitOfLoop
+    End If
+Next iter
+
+exitOfLoop
+
+Hg(1, 2) = Ha(6, 6)
+Hg(2, 2) = Ha(6, 9)
+Hg(3, 2) = Ha(6, 12)
+Hg(4, 2) = Ha(6, 15)
+Hg(5, 2) = Ha(8, 11)
+Hg(6, 2) = Ha(8, 14)
+Hg(7, 2) = Ha(9, 6)
+Hg(8, 2) = Ha(9, 8)
+Hg(9, 2) = Ha(10, 10)
+Hg(10, 2) = Ha(11, 12)
+Hg(11, 2) = Ha(12, 6)
+Hg(12, 2) = Ha(12, 15)
+Hg(13, 2) = Ha(13, 9)
+Hg(14, 2) = Ha(14, 7)
+Hg(15, 2) = Ha(14, 11)
+Hg(16, 2) = Ha(14, 13)
+
+End Sub
+
