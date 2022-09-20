@@ -1,0 +1,64 @@
+Const zone = 3
+
+Dim qx(zone), qy(zone), ux(zone), uy(zone), b(30, 30), T(30, 30) As Double
+Dim N(zone)
+Dim maxN, Nindex
+Sub YAS_optimizasyon(INP)
+
+Dim k, i, j, T1, T2, T3 As Double
+
+ux(1) = INP(1)
+uy(1) = INP(2)
+qx(1) = INP(3)
+qy(1) = INP(4)
+T1 = INP(5)
+ux(2) = INP(6)
+uy(2) = INP(7)
+qx(2) = INP(8)
+qy(2) = INP(9)
+T2 = INP(10)
+ux(3) = INP(11)
+uy(3) = INP(12)
+qx(3) = INP(13)
+qy(3) = INP(14)
+T3 = INP(15)
+
+For i = 4 To 17
+    For j = 4 To 17
+        T(i, j) = 0
+    Next
+Next
+        
+For i = 5 To 16
+    For j = 4 To 16
+        For k = 1 To zone
+        
+            N(k) = 1 / (2 * 3.1415 * qx(k) * qy(k)) * Exp(-0.5 * (((j - ux(k)) / qx(k)) ^ 2 + ((i - uy(k)) / qy(k)) ^ 2))
+            
+        Next k
+        
+         maxN = N(1)
+         
+        For k = 1 To zone
+            If N(k) >= maxN Then
+                maxN = N(k)
+                Nindex = k
+                b(i, j) = Nindex
+            End If
+             If b(i, j) = 1 Then
+                    T(i, j) = T1
+                    End If
+                    If b(i, j) = 2 Then
+                        T(i, j) = T2
+                    End If
+                    If b(i, j) = 3 Then
+                        T(i, j) = T3
+                    End If
+        Next k
+    Next j
+Next i
+
+Call YAS_heterojen(T)
+
+End Sub
+
