@@ -1,0 +1,179 @@
+Dim X(), XX(), xmax(), xmin(), RAND(), DIFF(), Scaled(), V(), U(), NP, ND, F, CR, NGen, FitBest, FitWorst, FitSum, FitMean, Gen, Pi, BestIndex, i, k, j As Integer
+
+Public Q(30, 30), IBOUND(30, 30), H(30, 30), Ha(30, 30), hata(30, 30), Hg(16, 2) As Double
+
+Sub DE()
+
+For i = 1 To 16
+    Hg(i, 1) = Sayfa2.Cells(i + 1, 28)
+Next i
+
+
+
+
+For i = 5 To 16
+    For j = 5 To 16
+        IBOUND(i, j) = Sayfa3.Cells(i, j)
+    Next j
+Next i
+
+For i = 5 To 16
+    For j = 5 To 16
+        If IBOUND(i, j) = -1 Then
+            Ha(i, j) = Sayfa2.Cells(i, j)
+            H(i, j) = Sayfa2.Cells(i, j)
+        End If
+        
+        If IBOUND(i, j) = 1 Then
+            H(i, j) = 100
+            Ha(i, j) = 100
+        End If
+        
+        If IBOUND(i, j) = 1 Or IBOUND(i, j) = -1 Then
+            Q(i, j) = Sayfa5.Cells(i, j)
+        End If
+    Next j
+Next i
+
+Randomize Timer
+
+Sayfa9.[k2:n50000].ClearContents
+
+Pi = 3.141592654
+
+NP = Sayfa9.Range("b1")
+ND = Sayfa9.Range("b2")
+F = Sayfa9.Range("b3")
+CR = Sayfa9.Range("b4")
+NGen = Sayfa9.Range("b5")
+
+ReDim X(NP, ND), XX(ND)
+ReDim xmax(ND)
+ReDim xmin(ND)
+ReDim RAND(4)
+ReDim DIFF(ND)
+ReDim Scaled(ND)
+ReDim V(ND)
+ReDim U(ND)
+
+For i = 1 To ND
+    xmin(i) = Sayfa9.Cells(i + 6, 2)
+    xmax(i) = Sayfa9.Cells(i + 6, 3)
+Next
+
+For i = 1 To NP
+    For j = 1 To ND
+        X(i, j) = xmin(j) + Rnd * (xmax(j) - xmin(j))
+    Next
+    X(i, 0) = Fitness(X, i)
+Next
+
+For Gen = 1 To NGen
+
+    For i = 1 To NP
+        
+            RAND(1) = Int(Rnd * (NP - 1) + 1 + 0.5)
+1
+            RAND(2) = Int(Rnd * (NP - 1) + 1 + 0.5)
+            If RAND(2) = RAND(1) Then GoTo 1
+2
+            RAND(3) = Int(Rnd * (NP - 1) + 1 + 0.5)
+            If RAND(3) = RAND(1) Or RAND(3) = RAND(2) Then GoTo 2
+        
+        For j = 1 To ND
+            V(j) = X(RAND(3), j) + F * (X(RAND(1), j) - X(RAND(2), j))
+        Next
+        
+        For j = 1 To ND
+            If V(j) > xmax(j) Then
+                If Rnd > 0.5 Then
+                    V(j) = xmax(j)
+                Else
+                    V(j) = xmax(j) - Rnd * (xmax(j) - xmin(j))
+                End If
+            End If
+            
+            If V(j) < xmin(j) Then
+                If Rnd > 0.5 Then
+                    V(j) = xmin(j)
+                Else
+                    V(j) = xmin(j) + Rnd * (xmax(j) - xmin(j))
+                End If
+            End If
+                
+        Next
+        
+        For j = 1 To ND
+            jrand = Int(Rnd * ND + 1)
+            If Rnd <= CR Or j = jrand Then
+                U(j) = V(j)
+            Else
+                U(j) = X(i, j)
+            End If
+            X(0, j) = U(j)
+        Next
+        
+        X(0, 0) = Fitness(X, 0)
+        
+        If X(0, 0) < X(i, 0) Then
+            For j = 0 To ND
+                X(i, j) = X(0, j)
+            Next
+        End If
+    
+    Next i
+    
+    FitBest = X(1, 0)
+    FitWorst = X(1, 0)
+    FitSum = 0
+    For i = 1 To NP
+        If X(i, 0) <= FitBest Then
+            FitBest = X(i, 0)
+            BestIndex = i
+        End If
+        
+        If X(i, 0) >= FitWorst Then
+            FitWorst = X(i, 0)
+        End If
+        
+        FitSum = FitSum + X(i, 0)
+    Next
+    
+    FitMean = FitSum / NP
+       
+    Sayfa9.Cells(Gen + 1, 11) = Gen
+    Sayfa9.Cells(Gen + 1, 12) = FitBest
+    Sayfa9.Cells(Gen + 1, 13) = FitMean
+    Sayfa9.Cells(Gen + 1, 14) = FitWorst
+    
+    Sayfa9.Cells(7, 5) = Gen
+    Sayfa9.Cells(7, 6) = FitBest
+    
+    For i = 1 To ND
+        Sayfa9.Cells(i + 6, 4) = X(BestIndex, i)
+    Next
+
+Next Gen
+
+End Sub
+
+Function Fitness(X, i)
+
+For kk = 1 To ND
+    XX(kk) = X(i, kk)
+Next kk
+
+Call YAS_optimizasyon(XX)
+
+Dim FX
+
+FX = 0
+For kk = 1 To 16
+    
+    FX = FX + (Hg(kk, 1) - Hg(kk, 2)) ^ 2
+    
+Next kk
+
+Fitness = FX
+
+End Function
